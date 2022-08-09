@@ -35,13 +35,48 @@ public class Scene : MonoBehaviour
 
         // Image plane "corner" rays first (frustum edges).
         this.debug.Ray(new Ray(Vector3.zero, NormalizedImageToWorldCoord(0f, 0f)), Color.blue);
-        
+        this.debug.Ray(new Ray(Vector3.zero, NormalizedImageToWorldCoord(0f, 1f)), Color.blue);
+        this.debug.Ray(new Ray(Vector3.zero, NormalizedImageToWorldCoord(1f, 0f)), Color.blue);
+        this.debug.Ray(new Ray(Vector3.zero, NormalizedImageToWorldCoord(1f, 1f)), Color.blue);
+
         // Add more rays to visualise here...
+        for(int i=0; i<image.Width; i++)
+        {
+            for(int j=0; j<image.Height; j++)
+            {
+                var x = (i+0.5f)/image.Width;
+                var y = (j+0.5f)/image.Height;
+                this.debug.Ray(new Ray(Vector3.zero, NormalizedImageToWorldCoord(x, y)), Color.white);
+            }
+        }
+        
     }
 
     private void Render()
     {
-        // Render the image here...
+        for (int i = 0; i < image.Width; i++)
+        {
+            for (int j = 0; j < image.Height; j++)
+            {
+                var x = (i + 0.5f) / image.Width;
+                var y = (j + 0.5f) / image.Height;
+                foreach (var sceneEntity in FindObjectsOfType<SceneEntity>())
+                {
+                    
+                    var hit = sceneEntity.Intersect(new Ray(Vector3.zero, NormalizedImageToWorldCoord(x, y)));
+                    
+                    if( hit != null)
+                    {
+                        this.image.SetPixel(i, j, sceneEntity.Color());
+                        break;
+                    }
+                    else
+                    {
+                        this.image.SetPixel(i, j, Color.black); 
+                    }
+                }   
+            }
+        }
     }
 
     private Vector3 NormalizedImageToWorldCoord(float x, float y)
